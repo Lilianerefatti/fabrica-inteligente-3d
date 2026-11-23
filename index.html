@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fábrica Inteligente 3D</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    #legenda {
+        position: fixed;
+        left: 16px;
+        bottom: 16px;
+        z-index: 1;
+        padding: 12px 14px;
+        border-radius: 8px;
+        background: #ffffffeb;
+        color: #24384b;
+        box-shadow: 0 3px 12px #0002;
+    }
+
+    #legenda h2 {
+        margin: 0 0 8px;
+        font-size: 14px;
+    }
+
+    #legenda p {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 6px 0;
+        font-size: 13px;
+    }
+
+    .amostra {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+    }
+
+    .vermelho { background: #e4574f; }
+    .amarelo { background: #f2bd3d; }
+    .verde { background: #41a66d; }
+
+    #detalhes {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 1;
+        width: 270px;
+        padding: 14px 16px;
+        border-radius: 8px;
+        background: #ffffffeb;
+        color: #24384b;
+        box-shadow: 0 3px 12px #0002;
+    }
+
+    #detalhes h2 { margin: 0 0 10px; font-size: 16px; }
+    #detalhes p { margin: 7px 0; font-size: 13px; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+    #indicadores {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 1;
+        display: flex;
+        gap: 8px;
+    }
+
+    .indicador {
+        min-width: 120px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: #ffffffeb;
+        color: #24384b;
+        box-shadow: 0 3px 12px #0002;
+    }
+
+    .indicador strong,
+    .indicador span {
+        display: block;
+    }
+
+    .indicador strong {
+        font-size: 18px;
+    }
+
+    .indicador span {
+        margin-top: 4px;
+        font-size: 11px;
+    }
+
+    #buscaPallet {
+        position: fixed;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+        display: flex;
+        gap: 6px;
+        padding: 8px;
+        border-radius: 8px;
+        background: #ffffffeb;
+        box-shadow: 0 3px 12px #0002;
+    }
+
+    #termoBusca {
+        width: 220px;
+        padding: 8px;
+        border: 1px solid #cbd5dc;
+        border-radius: 5px;
+    }
+
+    #botaoBuscar {
+        padding: 8px 12px;
+        border: 0;
+        border-radius: 5px;
+        background: #24384b;
+        color: white;
+        cursor: pointer;
+    }
+
+    #filtroValidade {
+        padding: 8px;
+        border: 1px solid #cbd5dc;
+        border-radius: 5px;
+        background: white;
+    }
+
+    #seletorStatusMaquina {
+        width: 100%;
+        margin-top: 6px;
+        padding: 8px;
+        border: 1px solid #cbd5dc;
+        border-radius: 5px;
+        background: white;
+        color: #24384b;
+    }
+    
+    .separador-legenda {
+        margin: 10px 0;
+        border-top: 1px solid #d1dbe1;
+    }
+
+    #painelAlertas {
+        position: fixed;
+        top: 90px;
+        left: 16px;
+        z-index: 3;
+        width: min(310px, calc(100vw - 32px));
+        border-radius: 8px;
+        background: #ffffffeb;
+        color: #24384b;
+        box-shadow: 0 3px 12px #0002;
+    }
+
+    #painelAlertas summary {
+        padding: 12px 14px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    #listaAlertas {
+        max-height: 35vh;
+        overflow-y: auto;
+        padding: 0 12px 10px;
+    }
+
+    #listaAlertas p {
+        margin: 6px 0;
+        font-size: 13px;
+    }
+
+    .alerta-item {
+        display: block;
+        width: 100%;
+        margin: 5px 0;
+        padding: 8px;
+        border: 1px solid #d1dbe1;
+        border-radius: 6px;
+        background: white;
+        color: #24384b;
+        text-align: left;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    canvas { display: block; }
+
+    #info {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: #ffffffeb;
+      color: #24384b;
+      box-shadow: 0 3px 12px #0002;
+    }
+
+    #info strong, #info span { display: block; }
+    #info span { margin-top: 5px; font-size: 12px; color: #64778a; }
+
+
+    /* Ajustes para telas estreitas na vertical */
+@media (orientation: portrait) {
+    #info {
+        top: 8px;
+        left: 8px;
+        right: 8px;
+        padding: 10px 12px;
+    }
+
+    #buscaPallet {
+        top: 72px;
+        left: 8px;
+        right: 8px;
+        transform: none;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    #termoBusca {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    #botaoBuscar,
+    #filtroValidade {
+        width: 100%;
+    }
+
+    #detalhes {
+        top: 158px;
+        right: 8px;
+        width: min(270px, calc(100vw - 16px));
+        max-height: 22vh;
+        overflow-y: auto;
+    }
+
+    #legenda {
+        left: 8px;
+        bottom: 160px;
+        max-width: 145px;
+        padding: 9px 10px;
+    }
+
+    #legenda h2 {
+        font-size: 12px;
+    }
+
+    #legenda p {
+        font-size: 11px;
+    }
+
+    #indicadores {
+        left: 162px;
+        right: 8px;
+        bottom: 8px;
+        display: grid;
+        max-width: 520px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    #painelAlertas {
+        top: 470px;
+        left: 8px;
+        width: min(320px, calc(100vw - 16px));
+    }
+
+    #listaAlertas {
+        max-height: 28vh;
+    }
+
+    .indicador {
+        min-width: 0;
+        padding: 8px;
+    }
+
+    .indicador strong {
+        font-size: 15px;
+    }
+
+    .indicador span {
+        font-size: 10px;
+    }
+}
+    #restaurarStatus {
+        width: 100%;
+        margin-top: 8px;
+        padding: 8px;
+        border: 0;
+        border-radius: 5px;
+        background: #e8edf0;
+        color: #24384b;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+
+/* Ajuste extra para celulares mais estreitos */
+@media (max-width: 420px) and (orientation: portrait) {
+    #legenda {
+        bottom: 132px;
+    }
+
+    #indicadores {
+        left: 8px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .indicador {
+        padding: 7px 5px;
+    }
+
+    .indicador strong {
+        font-size: 14px;
+    }
+
+    .indicador span {
+        font-size: 9px;
+    }
+}
+
+  @media (max-width: 1100px) and (orientation: landscape) {
+    #buscaPallet {
+        top: 82px;
+    }
+    
+       #painelAlertas {
+        top: 145px;
+        left: 12px;
+        width: min(310px, calc(100vw - 24px));
+    } 
+}
+  </style>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div id="info">
+    <strong>Fábrica Inteligente</strong>
+    <span>Arraste para girar · use a roda do mouse para aproximar</span>
+  </div>
+
+    <details id="painelAlertas">
+        <summary>Alertas operacionais</summary>
+        <div id="listaAlertas">
+            <p>Verificando alertas...</p>
+        </div>
+    </details>
+
+    <aside id="detalhes">
+        <h2 id="tituloDetalhes">Detalhes do pallet</h2>
+        <p id="statusPallet">Clique em uma caixa para consultar.</p>
+
+        <div id="dadosPallet" hidden>
+            <p><strong>Endereço:</strong> <span id="endereco"></span></p>
+            <p><strong>Produto:</strong> <span id="produto"></span></p>
+            <p><strong>Lote:</strong> <span id="lote"></span></p>
+            <p><strong>Quantidade:</strong> <span id="caixas"></span></p>
+            <p><strong>Validade:</strong> <span id="validade"></span></p>
+        </div>
+        
+        <div id="dadosMaquina" hidden>
+            <p><strong>Linha:</strong> <span id="nomeMaquina"></span></p>
+            <p><strong>Status:</strong> <span id="estadoMaquina"></span></p>
+            <p><strong>Setor:</strong> Produção</p>
+            <p><strong>Produto:</strong> <span id="produtoMaquina"></span></p>
+            <p><strong>Responsável:</strong> <span id="responsavelMaquina"></span></p>
+            <p><strong>Tempo nesse status:</strong> <span id="tempoEstadoMaquina"></span></p>
+            <label for="seletorStatusMaquina"><strong>Alterar status:</strong></label>
+
+            <select id="seletorStatusMaquina">
+                <option value="Produzindo">Produzindo</option>
+                <option value="Parada">Parada</option>
+                <option value="Manutenção">Em manutenção</option>
+
+            </select>
+
+            <button id="restaurarStatus" type="button">
+                Reiniciar demonstração
+            </button>
+
+        </div>
+
+    </aside>
+
+    <section id="indicadores">
+        <article class="indicador">
+            <strong id="totalPallets">0</strong>
+            <span>pallets cadastrados</span>
+        </article>
+
+        <article class="indicador">
+            <strong id="palletsCriticos">0</strong>
+            <span>com validade até 30 dias</span>
+        </article>
+
+        <article class="indicador">
+            <strong id="totalCaixas">0</strong>
+            <span>caixas em estoque</span>
+        </article>
+
+        <article class="indicador">
+            <strong id="linhasProduzindo">0</strong>
+            <span>linhas produzindo</span>
+        </article>
+
+        <article class="indicador">
+            <strong id="linhasParadas">0</strong>
+            <span>linhas paradas</span>
+        </article>
+
+        <article class="indicador">
+            <strong id="linhasManutencao">0</strong>
+           <span>em manutenção</span>
+        </article>
+    </section>
+
+    <div id="buscaPallet">
+        <input
+            id="termoBusca"
+            type="search"
+            placeholder="ID, produto, lote ou endereço"
+        >
+        <button id="botaoBuscar">Buscar</button>
+        <select id="filtroValidade">
+            <option value="todas">Todas as validades</option>
+            <option value="critica">Até 30 dias</option>
+            <option value="atencao">De 31 a 90 dias</option>
+            <option value="regular">Mais de 90 dias</option>
+        </select>
+    </div>
+
+  <script type="module" src="./main.js"></script>
+
+    <aside id="legenda">
+        <h2>Validade dos produtos</h2>
+        <p><span class="amostra vermelho"></span> Até 30 dias</p>
+        <p><span class="amostra amarelo"></span> De 31 a 90 dias</p>
+        <p><span class="amostra verde"></span> Mais de 90 dias</p>
+
+        <div class="separador-legenda"></div>
+
+        <h2>Status da produção</h2>
+        <p><span class="amostra verde"></span> Produzindo</p>
+        <p><span class="amostra vermelho"></span> Parada</p>
+        <p><span class="amostra amarelo"></span> Em manutenção</p>
+
+    </aside>
+</body>
+</html>
