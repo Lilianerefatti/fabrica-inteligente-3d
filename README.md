@@ -1,5 +1,7 @@
 # Fábrica Inteligente 3D
 
+![Prévia da Fábrica Inteligente 3D](fabrica-inteligente-preview.png)
+
 Demonstração interativa de uma fábrica com visualização 3D, produção contínua simulada e rastreamento de pallets. O projeto foi desenvolvido para apresentar, de forma visual, conceitos de operação, estoque, produção e expedição.
 
 ### Acesse a demonstração: https://lilianerefatti.github.io/fabrica-inteligente-3d/
